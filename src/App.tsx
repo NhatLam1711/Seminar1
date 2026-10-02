@@ -7,6 +7,8 @@ import SGDPage from './pages/SGDPage';
 import MinibatchGDPage from './pages/MinibatchGDPage';
 import { AnimatePresence, motion } from 'framer-motion';
 
+import animeBg from './assets/anime.png';
+
 function App() {
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -23,7 +25,7 @@ function App() {
       className="w-full h-screen flex flex-col text-white font-sans overflow-hidden transition-colors duration-500"
       style={{
         backgroundColor: 'var(--color-background)',
-        backgroundImage: currentPage === 0 ? "url('/src/assets/anime.png')" : 'none',
+        backgroundImage: currentPage === 0 ? `url(${animeBg})` : 'none',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed'
