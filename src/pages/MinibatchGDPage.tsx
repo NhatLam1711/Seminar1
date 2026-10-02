@@ -1,0 +1,118 @@
+import React, { useState } from 'react';
+import ThreeDSurface from '../components/ThreeDSurface';
+import { useGradientDescent } from '../hooks/useGradientDescent';
+import { Play, Pause, StepForward, RotateCcw } from 'lucide-react';
+
+export default function MinibatchGDPage() {
+  const [lr, setLr] = useState(0.04);
+  const [batchSize, setBatchSize] = useState(16);
+  const [isShuffle, setIsShuffle] = useState(true);
+  const { path, isPlaying, setIsPlaying, iteration, reset, step } = useGradientDescent(batchSize, lr, isShuffle);
+
+  return (
+    <div className="w-full h-full p-8 flex flex-col pt-24 overflow-y-auto">
+      <div className="flex flex-col lg:flex-row gap-8 w-full max-w-7xl mx-auto flex-1 min-h-[500px]">
+        {/* Visualization */}
+        <div className="flex-[2] bg-surface rounded-xl p-6 shadow-2xl flex flex-col">
+          <div className="mb-4 text-center">
+            <h2 className="text-2xl font-bold mb-2 text-amber-500">Mini-batch Gradient Descent</h2>
+            <p className="text-gray-400 text-sm max-w-md mx-auto">Uses a small subset of data per step. Balances the speed of SGD with the stability of Batch GD.</p>
+          </div>
+          <div className="flex-1 w-full relative">
+            <ThreeDSurface path={path} isPlaying={isPlaying} />
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div className="flex-1 bg-surface rounded-xl border border-white/10 p-6 flex flex-col shadow-2xl">
+          <h3 className="text-xl font-bold mb-6">Controls</h3>
+          
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <button 
+              onClick={() => setIsPlaying(!isPlaying)}
+              className="py-3 rounded-lg bg-amber-500 hover:bg-amber-600 transition-colors flex items-center justify-center font-semibold text-black"
+            >
+              {isPlaying ? <><Pause className="mr-2" size={20} /> Pause</> : <><Play className="mr-2" size={20} /> Play</>}
+            </button>
+            <button 
+              onClick={step}
+              disabled={isPlaying}
+              className="py-3 rounded-lg bg-surface border border-white/20 hover:bg-white/10 transition-colors flex items-center justify-center disabled:opacity-50"
+            >
+              <StepForward className="mr-2" size={20} /> Step
+            </button>
+            <button 
+              onClick={reset}
+              className="py-3 rounded-lg bg-surface border border-white/20 hover:bg-white/10 transition-colors flex items-center justify-center col-span-2"
+            >
+              <RotateCcw className="mr-2" size={20} /> Restart
+            </button>
+          </div>
+
+          <div className="mb-6 flex items-center justify-between bg-black/30 p-3 rounded-lg border border-white/10">
+            <span className="text-sm font-medium text-gray-300">Shuffle Data</span>
+            <button 
+              onClick={() => { setIsShuffle(!isShuffle); reset(); }}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${isShuffle ? 'bg-amber-500' : 'bg-gray-600'}`}
+            >
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isShuffle ? 'translate-x-6' : 'translate-x-1'}`} />
+            </button>
+          </div>
+
+          <div className="mb-6 space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-2">
+                Batch Size = <span className="text-amber-500 font-mono">{batchSize}</span>
+              </label>
+              <input 
+                type="range" 
+                min="2" max="64" step="2" 
+                value={batchSize} 
+                onChange={(e) => {
+                  setBatchSize(parseInt(e.target.value));
+                  reset();
+                }}
+                className="w-full accent-amber-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-2">
+                Learning Rate (α) = <span className="text-amber-500 font-mono">{lr.toFixed(3)}</span>
+              </label>
+              <input 
+                type="range" 
+                min="0.005" max="0.1" step="0.005" 
+                value={lr} 
+                onChange={(e) => {
+                  setLr(parseFloat(e.target.value));
+                  if (iteration === 0) reset();
+                }}
+                className="w-full accent-amber-500"
+              />
+            </div>
+          </div>
+          
+          <div className="mt-auto bg-black/40 rounded-lg p-4 font-mono text-sm space-y-2">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Batch Size:</span>
+              <span className="text-amber-500">{batchSize}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Iteration:</span>
+              <span className="text-white">{iteration}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">w1:</span>
+              <span className="text-amber-500">{path[path.length-1].w1.toFixed(3)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">w2:</span>
+              <span className="text-amber-500">{path[path.length-1].w2.toFixed(3)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
